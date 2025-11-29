@@ -1,42 +1,39 @@
-import gsap from 'gsap';
+import gsap from "gsap";
 import { featureLists, goodLists } from "../../constants";
 import { useGSAP } from "@gsap/react";
 import { useMediaQuery } from "react-responsive";
 
 const Art = () => {
+  const isMobile = useMediaQuery({ maxWidth: 767 });
 
-    const isMobile = useMediaQuery({maxWidth: 767 })
+  useGSAP(() => {
+    const start = isMobile ? "top 20%" : "top top";
 
-    useGSAP(() => {
-        const start = isMobile ? 'top 20%' : 'top top';
+    const maskTimeline = gsap.timeline({
+      scrollTrigger: {
+        trigger: "#art",
+        start,
+        end: "bottom center",
+        scrub: 1.5,
+        pin: true,
+      },
+    });
 
-        const maskTimeline = gsap.timeline({
-            scrollTrigger:{
-                trigger: '#art',
-                start,
-                end: 'bottom center',
-                scrub: 1.5,
-                pin: true
-
-            }
-        })
-
-        maskTimeline.to('.will-fade',{
-            opacity: 0,
-            stagger: 0.2,
-            ease: 'power1.inOut',
-        })
-        .to('.masked-img',{
-            scale: 1.3,
-            maskedPosition: 'center',
-            maskSize: '400%',
-            duration: 1,
-            ease: 'power1.inOut',
-
-        })
-        .to('#masked-content',{opacity: 1, duration: 1, ease: 'power1.inOut'})
-
-    })
+    maskTimeline
+      .to(".will-fade", {
+        opacity: 0,
+        stagger: 0.2,
+        ease: "power1.inOut",
+      })
+      .to(".masked-img", {
+        scale: 1.3,
+        maskedPosition: "center",
+        maskSize: "400%",
+        duration: 1,
+        ease: "power1.inOut",
+      })
+      .to("#masked-content", { opacity: 1, duration: 1, ease: "power1.inOut" });
+  });
 
   return (
     <div id="art">
@@ -70,14 +67,16 @@ const Art = () => {
           </ul>
         </div>
 
-<div className="masked-container" >
-    <h2 className="will-fade" >Sip-Worthy Perfection</h2>
-    <div id="masked-content" >
-    <h3>Made with Craft, Poured with Passion</h3>
-    <p>This isn't just a drink, It's a carefully crafted moment made just for you.</p>
-    </div>
-</div>
-
+        <div className="masked-container">
+          <h2 className="will-fade">Sip-Worthy Perfection</h2>
+          <div id="masked-content">
+            <h3>Made with Craft, Poured with Passion</h3>
+            <p>
+              This isn't just a drink, It's a carefully crafted moment made just
+              for you.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
