@@ -1,4 +1,4 @@
-import { SplitText } from "gsap/all";
+import { SplitText, ScrollTrigger } from "gsap/all";
 import React, { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -14,7 +14,6 @@ const Hero = () => {
 
   const isMobile = useMediaQuery({ maxWidth: 767 });
 
-  // Main GSAP animations - run once on mount
   useGSAP(() => {
     const heroSplit = new SplitText(".title", {
       type: "chars words",
@@ -79,31 +78,49 @@ const Hero = () => {
     };
   }, [isMobile]);
 
-  // Audio scroll trigger setup - separate hook that runs when musicEnabled changes
   useGSAP(() => {
-    if (musicEnabled && audioRef.current) {
-      const audio = audioRef.current;
+    if (!musicEnabled || !audioRef.current) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      ScrollTrigger.getAll().forEach((trigger) => {
+        if (trigger.vars?.id === "audio-hero" || trigger.vars?.id === "audio-video") {
+          trigger.kill();
+        }
+      });
+      return;
+    }
 
-      // Set initial volume
-      audio.volume = 0.3;
+    const audio = audioRef.current;
+    let heroScrollTrigger = null;
+    let videoScrollTrigger = null;
 
-      // Preload audio when enabled
-      audio.load();
+    audio.volume = 0.3;
 
-      // Create scroll trigger for audio
-      const heroScrollTrigger = gsap.to(audio, {
+    const setupAudioTriggers = () => {
+      if (!audioRef.current || !musicEnabled) return;
+
+      if (heroScrollTrigger) heroScrollTrigger.scrollTrigger?.kill();
+      if (videoScrollTrigger) videoScrollTrigger.scrollTrigger?.kill();
+
+      heroScrollTrigger = gsap.to(audio, {
         scrollTrigger: {
           trigger: "#hero",
           start: "top top",
           end: "bottom top",
           scrub: true,
+          id: "audio-hero",
           onUpdate: (self) => {
-            if (musicEnabled && audio.readyState >= 2) {
-              // Calculate volume based on scroll progress
+            const currentMusicEnabled = useMusicStore.getState().musicEnabled;
+            if (!currentMusicEnabled) {
+              audio.pause();
+              return;
+            }
+            if (audio.readyState >= 2) {
               const progress = self.progress;
               audio.volume = Math.max(0, Math.min(0.5, progress * 0.5));
 
-              // Play/pause based on scroll position
               if (progress > 0.1 && audio.paused) {
                 audio.play().catch((err) => {
                   console.warn("Audio play failed:", err);
@@ -116,17 +133,21 @@ const Hero = () => {
         },
       });
 
-      // Also sync with video scroll section
-      const videoScrollTrigger = gsap.to(audio, {
+      videoScrollTrigger = gsap.to(audio, {
         scrollTrigger: {
-          trigger: ".video",
+          trigger: "#hero",
           start: isMobile ? "top 50%" : "center 60%",
           end: "max",
           scrub: true,
+          id: "audio-video",
           onUpdate: (self) => {
-            if (musicEnabled && audio.readyState >= 2) {
+            const currentMusicEnabled = useMusicStore.getState().musicEnabled;
+            if (!currentMusicEnabled) {
+              audio.pause();
+              return;
+            }
+            if (audio.readyState >= 2) {
               const progress = self.progress;
-              // Maintain volume during video section
               audio.volume = 0.4;
 
               if (progress > 0 && audio.paused) {
@@ -138,22 +159,28 @@ const Hero = () => {
           },
         },
       });
+    };
 
-      // Cleanup function
-      return () => {
-        heroScrollTrigger?.scrollTrigger?.kill();
-        videoScrollTrigger?.scrollTrigger?.kill();
-        if (audio) {
-          audio.pause();
-          audio.currentTime = 0;
+    if (audio.readyState >= 2) {
+      setupAudioTriggers();
+    } else {
+      const onCanPlay = () => {
+        if (musicEnabled && audioRef.current) {
+          setupAudioTriggers();
         }
       };
-    } else if (audioRef.current && !musicEnabled) {
-      // Pause and reset audio if disabled
-      const audio = audioRef.current;
-      audio.pause();
-      audio.currentTime = 0;
+      audio.addEventListener("canplay", onCanPlay, { once: true });
+      audio.load();
     }
+
+    return () => {
+      heroScrollTrigger?.scrollTrigger?.kill();
+      videoScrollTrigger?.scrollTrigger?.kill();
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    };
   }, [musicEnabled, isMobile]);
 
   return (
@@ -177,7 +204,7 @@ const Hero = () => {
         <img
           src="/images/rubber-ducky.png"
           alt="left-leaf"
-          className="left-leaf w-[200px] "
+          className="left-leaf w-[100px] md:w-[200px] "
         />
         <img
           src="/images/friends.png"
@@ -192,15 +219,15 @@ const Hero = () => {
                 Senior <br /> Mern Stack
               </p>
             </div>
-            <div className="view-cocktails">
+            <div className="view-experiences">
               <p className="subtitle">
                 Emotion-driven development focuses on designing software that
-                anticipates and responds to users feelings, creating
-                experiences that feel intuitive, engaging, and human-centered.
-                It prioritizes emotional impact alongside functionality to boost
+                anticipates and responds to users feelings, creating experiences
+                that feel intuitive, engaging, and human-centered. It
+                prioritizes emotional impact alongside functionality to boost
                 satisfaction and connection.
               </p>
-              <a href="#cocktails">View Experiences</a>
+              <a href="#experiences">View Experiences</a>
             </div>
           </div>
         </div>

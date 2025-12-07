@@ -49,13 +49,13 @@ const Contact = () => {
         src="/images/contact-me.png"
         alt="leaf-right"
         id="f-right-leaf"
-        className="w-[200px]"
+        className="w-[100px] md:w-[200px]"
       />
       <img
         src="/images/earth.png"
         alt="leaf-left"
         id="f-left-leaf"
-        className="w-[200px]"
+        className="w-[100px] md:w-[200px]"
       />
 
       <div className="content">

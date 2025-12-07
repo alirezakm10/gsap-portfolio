@@ -3,7 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger, SplitText } from "gsap/all";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
-import Cocktails from "./components/Cocktails";
+import Experiences from "./components/Experiences";
 import About from "./components/About";
 import Art from "./components/Art";
 import Menu from "./components/Menu";
@@ -16,7 +16,7 @@ const App = () => {
     <main>
       <Navbar />
       <Hero />
-      <Cocktails />
+      <Experiences />
       <About />
       <Art />
       <Menu />

@@ -49,7 +49,7 @@ const Art = () => {
             ))}
           </ul>
 
-          <div className="cocktail-img">
+          <div className="me-img">
             <img
               src="/images/under-img.jpg"
               alt="cocktail"

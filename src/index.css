@@ -130,7 +130,7 @@ body {
           @apply 2xl:text-start text-center;
         }
 
-        .view-cocktails {
+        .view-experiences {
           @apply space-y-5 text-lg lg:max-w-2xs md:max-w-xs w-full;
 
           p {
@@ -149,7 +149,7 @@ body {
     @apply w-full h-full absolute inset-0 object-cover;
   }
 
-  #cocktails {
+  #experiences {
     @apply relative min-h-dvh w-full overflow-hidden;
 
     #c-left-leaf {
@@ -264,7 +264,7 @@ body {
       @apply flex md:flex-row flex-col justify-between md:mb-16 md:mt-0 mt-40 gap-10;
     }
 
-    .cocktail-img {
+    .me-img {
       @apply md:w-[60vw] w-full h-[50vh] md:h-[70vh] rounded-4xl overflow-hidden absolute top-0 md:top-1/2 md:-translate-y-1/2 left-1/2 -translate-x-1/2;
     }
 

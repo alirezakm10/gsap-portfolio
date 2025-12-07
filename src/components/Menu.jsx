@@ -58,7 +58,7 @@ const Menu = () => {
         src="/images/confusion.png"
         alt="left-leaf"
         id="m-left-leaf"
-        className="w-[200px]"
+        className="w-[100px] md:w-[200px]"
       />
       <img
         src="/images/git.png"

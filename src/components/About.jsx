@@ -38,7 +38,7 @@ const About = () => {
       <div className="mb-16 md:px-0 px-5">
         <div className="content">
           <div className="md:col-span-8">
-            <p className="badge">Best Cocktails</p>
+            <p className="badge">Best Experiences</p>
             <h2>
               Histories <span className="text-white">-</span>{" "}
               whispers the stories that shaped who we are today

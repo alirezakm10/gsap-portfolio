@@ -71,7 +71,7 @@ const MusicPermissionModal = ({ isOpen, onAllow, onDeny }) => {
       {/* Overlay */}
       <div
         ref={overlayRef}
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        className="absolute inset-0 bg-none"
         onClick={onDeny}
         aria-hidden="true"
       />
@@ -79,7 +79,7 @@ const MusicPermissionModal = ({ isOpen, onAllow, onDeny }) => {
       {/* Modal Content */}
       <div
         ref={contentRef}
-        className="relative z-10 bg-black border border-white/20 rounded-lg p-8 max-w-md mx-4 shadow-2xl"
+        className="relative z-10 bg-black/20 backdrop-blur-sm border border-white/20 rounded-lg p-8 max-w-md mx-4 shadow-2xl"
       >
         <h2
           id="music-permission-title"

@@ -1,29 +1,18 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-const MUSIC_MODAL_SHOWN_KEY = "portfolio_music_modal_shown";
-
-/**
- * Helper to check if modal should be shown
- */
-const shouldShowModal = () => {
-  if (typeof window === "undefined") return false;
-  const modalShown = sessionStorage.getItem(MUSIC_MODAL_SHOWN_KEY);
-  return modalShown !== "true";
-};
-
 /**
  * Music Store
  * 
  * Manages music state and preferences using Zustand with persist middleware.
  * - musicEnabled: Persisted to localStorage
- * - showModal: Uses sessionStorage to show on every hard refresh
+ * - showModal: Shows on every page load (no storage, always ask)
  */
 export const useMusicStore = create(
   persist(
     (set) => ({
       musicEnabled: false,
-      showModal: shouldShowModal(),
+      showModal: true, // Always show modal on mount (no localStorage/sessionStorage)
 
       /**
        * Toggle music on/off
@@ -37,9 +26,6 @@ export const useMusicStore = create(
        * Handle modal allow action
        */
       handleAllowMusic: () => {
-        if (typeof window !== "undefined") {
-          sessionStorage.setItem(MUSIC_MODAL_SHOWN_KEY, "true");
-        }
         set({ musicEnabled: true, showModal: false });
       },
 
@@ -47,24 +33,13 @@ export const useMusicStore = create(
        * Handle modal deny action
        */
       handleDenyMusic: () => {
-        if (typeof window !== "undefined") {
-          sessionStorage.setItem(MUSIC_MODAL_SHOWN_KEY, "true");
-        }
         set({ musicEnabled: false, showModal: false });
       },
     }),
     {
       name: "portfolio-music-preference", // localStorage key
-      partialize: (state) => ({ musicEnabled: state.musicEnabled }), // Only persist musicEnabled
+      partialize: (state) => ({ musicEnabled: state.musicEnabled }), // Only persist musicEnabled, not showModal
     }
   )
 );
-
-// Initialize showModal on store creation (for SSR safety)
-if (typeof window !== "undefined") {
-  const initialState = useMusicStore.getState();
-  if (initialState.showModal !== shouldShowModal()) {
-    useMusicStore.setState({ showModal: shouldShowModal() });
-  }
-}
 
