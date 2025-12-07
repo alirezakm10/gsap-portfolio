@@ -32,11 +32,15 @@ const Contact = () => {
         duration: 1,
         ease: "power1.inOut",
       })
-      .to("#f-left-leaf", {
-        y: "-50",
-        duration: 1,
-        ease: "power1.inOut",
-      },'<');
+      .to(
+        "#f-left-leaf",
+        {
+          y: "-50",
+          duration: 1,
+          ease: "power1.inOut",
+        },
+        "<"
+      );
   });
 
   return (
@@ -55,24 +59,18 @@ const Contact = () => {
       />
 
       <div className="content">
-        <h2>Where to Find Us</h2>
+        <h2>Contact Me</h2>
+        
         <div>
-          <h3>Visit Our Bar</h3>
-          <p>456, Raq Blvd. #404, Los Angeles, CA 90210</p>
+          <h3>Phone Number</h3>
+          <p>(+98) 919 728 9072</p>
         </div>
+
         <div>
-          <h3>Contact Us</h3>
-          <p>(555) 987-6543</p>
-          <p>hello@jsmcocktail.com</p>
+          <h3>Email</h3>
+          <p>alireza.version@gmail.com</p>
         </div>
-        <div>
-          <h3>Open Every Day</h3>
-          {openingHours.map((time, idx) => (
-            <p key={idx}>
-              {time.day}:{time.time}
-            </p>
-          ))}
-        </div>
+
         <div>
           <h3>Socials</h3>
           <div className="flex-center gap-5">

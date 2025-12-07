@@ -3,12 +3,18 @@ import React, { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useMediaQuery } from "react-responsive";
+import { useMusicStore } from "../stores/musicStore";
+import MusicPermissionModal from "./MusicPermissionModal";
 
 const Hero = () => {
   const videoRef = useRef();
+  const audioRef = useRef(null);
+  const { musicEnabled, showModal, handleAllowMusic, handleDenyMusic } =
+    useMusicStore();
 
   const isMobile = useMediaQuery({ maxWidth: 767 });
 
+  // Main GSAP animations - run once on mount
   useGSAP(() => {
     const heroSplit = new SplitText(".title", {
       type: "chars words",
@@ -71,10 +77,100 @@ const Hero = () => {
         currentTime: videoRef.current.duration,
       });
     };
-  }, []);
+  }, [isMobile]);
+
+  // Audio scroll trigger setup - separate hook that runs when musicEnabled changes
+  useGSAP(() => {
+    if (musicEnabled && audioRef.current) {
+      const audio = audioRef.current;
+
+      // Set initial volume
+      audio.volume = 0.3;
+
+      // Preload audio when enabled
+      audio.load();
+
+      // Create scroll trigger for audio
+      const heroScrollTrigger = gsap.to(audio, {
+        scrollTrigger: {
+          trigger: "#hero",
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+          onUpdate: (self) => {
+            if (musicEnabled && audio.readyState >= 2) {
+              // Calculate volume based on scroll progress
+              const progress = self.progress;
+              audio.volume = Math.max(0, Math.min(0.5, progress * 0.5));
+
+              // Play/pause based on scroll position
+              if (progress > 0.1 && audio.paused) {
+                audio.play().catch((err) => {
+                  console.warn("Audio play failed:", err);
+                });
+              } else if (progress <= 0.05 && !audio.paused) {
+                audio.pause();
+              }
+            }
+          },
+        },
+      });
+
+      // Also sync with video scroll section
+      const videoScrollTrigger = gsap.to(audio, {
+        scrollTrigger: {
+          trigger: ".video",
+          start: isMobile ? "top 50%" : "center 60%",
+          end: "max",
+          scrub: true,
+          onUpdate: (self) => {
+            if (musicEnabled && audio.readyState >= 2) {
+              const progress = self.progress;
+              // Maintain volume during video section
+              audio.volume = 0.4;
+
+              if (progress > 0 && audio.paused) {
+                audio.play().catch((err) => {
+                  console.warn("Audio play failed:", err);
+                });
+              }
+            }
+          },
+        },
+      });
+
+      // Cleanup function
+      return () => {
+        heroScrollTrigger?.scrollTrigger?.kill();
+        videoScrollTrigger?.scrollTrigger?.kill();
+        if (audio) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      };
+    } else if (audioRef.current && !musicEnabled) {
+      // Pause and reset audio if disabled
+      const audio = audioRef.current;
+      audio.pause();
+      audio.currentTime = 0;
+    }
+  }, [musicEnabled, isMobile]);
 
   return (
     <>
+      <MusicPermissionModal
+        isOpen={showModal}
+        onAllow={handleAllowMusic}
+        onDeny={handleDenyMusic}
+      />
+      <audio
+        ref={audioRef}
+        src="/sounds/intro-beat.mp3"
+        preload="none"
+        loop
+        crossOrigin="anonymous"
+        style={{ display: "none" }}
+      />
       <section id="hero">
         <div className="noisy" />
         <h1 className="title">FreeStyle</h1>
