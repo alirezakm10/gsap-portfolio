@@ -1,4 +1,4 @@
-import { SplitText, ScrollTrigger } from "gsap/all";
+import { SplitText } from "gsap/all";
 import React, { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -14,6 +14,7 @@ const Hero = () => {
 
   const isMobile = useMediaQuery({ maxWidth: 767 });
 
+  // Main GSAP animations - run once on mount
   useGSAP(() => {
     const heroSplit = new SplitText(".title", {
       type: "chars words",
@@ -78,17 +79,14 @@ const Hero = () => {
     };
   }, [isMobile]);
 
+  // Audio scroll trigger setup - separate hook that runs when musicEnabled changes
   useGSAP(() => {
     if (!musicEnabled || !audioRef.current) {
+      // Pause and reset audio if disabled
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
       }
-      ScrollTrigger.getAll().forEach((trigger) => {
-        if (trigger.vars?.id === "audio-hero" || trigger.vars?.id === "audio-video") {
-          trigger.kill();
-        }
-      });
       return;
     }
 
@@ -96,14 +94,18 @@ const Hero = () => {
     let heroScrollTrigger = null;
     let videoScrollTrigger = null;
 
+    // Set initial volume
     audio.volume = 0.3;
 
+    // Wait for audio to be ready
     const setupAudioTriggers = () => {
       if (!audioRef.current || !musicEnabled) return;
 
+      // Kill existing triggers if any
       if (heroScrollTrigger) heroScrollTrigger.scrollTrigger?.kill();
       if (videoScrollTrigger) videoScrollTrigger.scrollTrigger?.kill();
 
+      // Create scroll trigger for audio in hero section
       heroScrollTrigger = gsap.to(audio, {
         scrollTrigger: {
           trigger: "#hero",
@@ -112,15 +114,12 @@ const Hero = () => {
           scrub: true,
           id: "audio-hero",
           onUpdate: (self) => {
-            const currentMusicEnabled = useMusicStore.getState().musicEnabled;
-            if (!currentMusicEnabled) {
-              audio.pause();
-              return;
-            }
-            if (audio.readyState >= 2) {
+            if (musicEnabled && audio.readyState >= 2) {
+              // Calculate volume based on scroll progress
               const progress = self.progress;
               audio.volume = Math.max(0, Math.min(0.5, progress * 0.5));
 
+              // Play/pause based on scroll position
               if (progress > 0.1 && audio.paused) {
                 audio.play().catch((err) => {
                   console.warn("Audio play failed:", err);
@@ -133,6 +132,7 @@ const Hero = () => {
         },
       });
 
+      // Also sync with video scroll section (use hero as trigger since video is fixed)
       videoScrollTrigger = gsap.to(audio, {
         scrollTrigger: {
           trigger: "#hero",
@@ -141,13 +141,9 @@ const Hero = () => {
           scrub: true,
           id: "audio-video",
           onUpdate: (self) => {
-            const currentMusicEnabled = useMusicStore.getState().musicEnabled;
-            if (!currentMusicEnabled) {
-              audio.pause();
-              return;
-            }
-            if (audio.readyState >= 2) {
+            if (musicEnabled && audio.readyState >= 2) {
               const progress = self.progress;
+              // Maintain volume during video section
               audio.volume = 0.4;
 
               if (progress > 0 && audio.paused) {
@@ -161,9 +157,11 @@ const Hero = () => {
       });
     };
 
+    // Check if audio is already loaded
     if (audio.readyState >= 2) {
       setupAudioTriggers();
     } else {
+      // Wait for audio to load
       const onCanPlay = () => {
         if (musicEnabled && audioRef.current) {
           setupAudioTriggers();
@@ -173,6 +171,7 @@ const Hero = () => {
       audio.load();
     }
 
+    // Cleanup function
     return () => {
       heroScrollTrigger?.scrollTrigger?.kill();
       videoScrollTrigger?.scrollTrigger?.kill();
